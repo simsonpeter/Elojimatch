@@ -46,34 +46,7 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
-            padding: 0 10px;
-        }
-        
-        .sound-toggle {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: white;
-            font-size: 16px;
-        }
-        
-        .sound-toggle.muted {
-            opacity: 0.6;
-        }
-        
-        .stars-display {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 6px 12px;
-            border-radius: 15px;
-            color: gold;
-            font-weight: bold;
-            font-size: 14px;
+            padding: 0 5px;
         }
         
         .shop-toggle {
@@ -86,14 +59,29 @@
             font-size: 14px;
         }
         
+        .stars-display {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px 12px;
+            border-radius: 15px;
+            color: gold;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
         .stats {
-            display: flex;
-            justify-content: space-around;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
             background: rgba(255, 255, 255, 0.2);
             padding: 10px;
             border-radius: 10px;
             margin-bottom: 20px;
             color: white;
+            font-size: 13px;
+        }
+        
+        .stat-item {
+            text-align: center;
         }
         
         .game-board {
@@ -195,6 +183,7 @@
             color: white;
             margin-top: 15px;
             min-height: 20px;
+            font-size: 13px;
         }
         
         .level-complete {
@@ -379,6 +368,42 @@
             font-size: 12px;
             margin-top: 15px;
         }
+        
+        .orientation-warning {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .orientation-warning.show {
+            display: flex;
+        }
+        
+        .orientation-warning h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        
+        .orientation-warning p {
+            font-size: 18px;
+            line-height: 1.5;
+        }
+        
+        .phone-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            transform: rotate(90deg);
+        }
     </style>
 </head>
 <body>
@@ -393,9 +418,22 @@
         </div>
         
         <div class="stats">
-            <div>Score: <span id="score">0</span></div>
-            <div>High Score: <span id="highScore">0</span></div>
-            <div>Level: <span id="level">1/100</span></div>
+            <div class="stat-item">
+                <div>Score</div>
+                <div id="score">0</div>
+            </div>
+            <div class="stat-item">
+                <div>High Score</div>
+                <div id="highScore">0</div>
+            </div>
+            <div class="stat-item">
+                <div>Moves</div>
+                <div id="moves">0</div>
+            </div>
+            <div class="stat-item">
+                <div>Level</div>
+                <div id="level">1/100</div>
+            </div>
         </div>
         
         <div class="game-board" id="gameBoard"></div>
@@ -454,6 +492,15 @@
             <button class="shop-btn" onclick="closeShop()">Close Shop</button>
         </div>
     </div>
+    
+    <div class="orientation-warning" id="orientationWarning">
+        <div>
+            <div class="phone-icon">📱</div>
+            <h2>Portrait Mode Only</h2>
+            <p>Please rotate your phone to portrait orientation to play this game.</p>
+            <p style="font-size: 14px; margin-top: 10px; opacity: 0.8;">This game is designed for vertical play only.</p>
+        </div>
+    </div>
 
     <script>
         // Game state
@@ -482,6 +529,16 @@
         let timeLimit = 0;
         let baseMoveLimit = 0;
         let baseTimeLimit = 0;
+        
+        // Check orientation
+        function checkOrientation() {
+            const warning = document.getElementById('orientationWarning');
+            if (window.innerWidth > window.innerHeight) {
+                warning.classList.add('show');
+            } else {
+                warning.classList.remove('show');
+            }
+        }
         
         // Generate 100 different emoji sets
         const generateEmojiSets = () => {
@@ -593,20 +650,6 @@
             setTimeout(() => playSound(700, 0.2, 'sine'), 150);
             setTimeout(() => playSound(900, 0.2, 'sine'), 300);
             setTimeout(() => playSound(1100, 0.3, 'sine'), 450);
-        }
-        
-        function toggleSound() {
-            soundEnabled = !soundEnabled;
-            const soundToggle = document.getElementById('soundToggle');
-            if (soundEnabled) {
-                soundToggle.textContent = '🔊';
-                soundToggle.classList.remove('muted');
-                if (gameStarted) playBackgroundMusic();
-            } else {
-                soundToggle.textContent = '🔇';
-                soundToggle.classList.add('muted');
-                stopBackgroundMusic();
-            }
         }
         
         // Get difficulty settings
@@ -950,6 +993,7 @@
             currentScore = calculateScore();
             document.getElementById('score').textContent = currentScore;
             document.getElementById('highScore').textContent = highScore;
+            document.getElementById('moves').textContent = moves;
             document.getElementById('level').textContent = `${currentLevel}/${totalLevels}`;
         }
         
@@ -1034,10 +1078,17 @@
         // Initialize the game when page loads
         window.onload = function() {
             // loadGameState(); // Would work in real browser
+            checkOrientation();
             showSplashScreen();
             document.body.addEventListener('touchstart', initAudio, { once: true });
             document.body.addEventListener('click', initAudio, { once: true });
         };
+        
+        // Handle orientation changes
+        window.addEventListener('resize', checkOrientation);
+        window.addEventListener('orientationchange', function() {
+            setTimeout(checkOrientation, 100);
+        });
     </script>
 </body>
 </html>
