@@ -90,6 +90,7 @@
             cursor: pointer;
             color: transparent;
             transition: all 0.3s ease;
+            overflow: hidden;
         }
         
         .card:hover {
@@ -104,6 +105,49 @@
         .card.matched {
             color: white;
             background: rgba(50, 205, 50, 0.4);
+        }
+        
+        /* Animated emoji styles */
+        .animated-emoji {
+            display: inline-block;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .animated-emoji:nth-child(2n) {
+            animation-delay: 0.5s;
+        }
+        
+        .animated-emoji:nth-child(3n) {
+            animation: bounce 2s ease-in-out infinite;
+        }
+        
+        .animated-emoji:nth-child(4n) {
+            animation: pulse 4s ease-in-out infinite;
+        }
+        
+        .animated-emoji:nth-child(5n) {
+            animation: spin 6s linear infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0px); }
+            25% { transform: translateY(-8px); }
+            75% { transform: translateY(-3px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         
         .controls {
@@ -230,8 +274,9 @@
         let currentLevel = 1;
         let totalLevels = 100;
         
-        // Generate 100 different emoji sets
+        // Generate 100 different emoji sets with animated emojis
         const generateEmojiSets = () => {
+            // Using standard Unicode emojis that are copyright-free
             const baseEmojis = [
                 '😀', '😂', '🥰', '😎', '🤩', '😍', '🥳', '😜', '🤓', '🤗', '🤑', '🤠', '😈', '👻', '🤖', '👽',
                 '🍎', '🍌', '🍒', '🍇', '🍊', '🍋', '🍑', '🍓', '🍕', '🍔', '🍟', '🌭', '🍦', '🍩', '🎂', '🍫',
@@ -240,13 +285,15 @@
                 '❤️', '💙', '💚', '💛', '💜', '🧡', '🖤', '🤍', '🤎', '💖', '💗', '💓', '💕', '💞', '💝', '💟',
                 '🚀', '✈️', '🚂', '🚗', '🚲', '🚁', '🚢', '🏍️', '🚌', '🚕', '🚙', '🚚', '🚛', '🚜', '🏎️', '🚓',
                 '🌟', '✨', '⭐', '💫', '🔥', '💯', '🎯', '🏆', '🥇', '🥈', '🥉', '🏅', '🎖️', '🏵️', '🎄', '🎁',
-                '🌈', '☀️', '🌙', '⭐', '☁️', '⚡', '❄️', '⛄', '☂️', '☔', '🌊', '💧', '🔥', '💥', '✨', '💫'
+                '🌈', '☀️', '🌙', '⭐', '☁️', '⚡', '❄️', '⛄', '☂️', '☔', '🌊', '💧', '🔥', '💥', '✨', '💫',
+                '🎭', '🎨', '🎬', '🎤', '🎧', '🎼', '🎹', '🥁', '🎷', '🎺', '🎸', '🎻', '🎲', '♟️', '🎯', '🎳',
+                '🧩', '🧸', '🎮', '🕹️', '🎲', '♠️', '♥️', '♦️', '♣️', '🃏', '🀄', '🎴', '🎭', '🖼️', '🎨', '🧵'
             ];
             
             const emojiSets = {};
             for (let i = 1; i <= 100; i++) {
                 // Take 8 unique emojis for each level
-                const startIndex = (i - 1) * 2; // Ensure we have enough unique emojis
+                const startIndex = (i - 1) * 3; // Ensure we have enough unique emojis
                 const levelEmojis = [];
                 for (let j = 0; j < 8; j++) {
                     const emojiIndex = (startIndex + j) % baseEmojis.length;
@@ -436,7 +483,7 @@
                 isMatched: false
             }));
             
-            // Render cards
+            // Render cards with animated emojis
             gameBoard.forEach(card => {
                 const cardElement = document.createElement('div');
                 cardElement.className = 'card';
@@ -489,9 +536,13 @@
             card.isFlipped = true;
             flippedCards.push(cardId);
             
-            // Update UI
+            // Update UI with animated emoji
             const cardElement = document.querySelector(`[data-id="${cardId}"]`);
-            cardElement.textContent = card.icon;
+            const animatedEmoji = document.createElement('span');
+            animatedEmoji.className = 'animated-emoji';
+            animatedEmoji.textContent = card.icon;
+            cardElement.innerHTML = '';
+            cardElement.appendChild(animatedEmoji);
             cardElement.classList.add('flipped');
             
             // Play sound
@@ -538,8 +589,8 @@
                 const secondElement = document.querySelector(`[data-id="${secondId}"]`);
                 firstElement.classList.remove('flipped');
                 secondElement.classList.remove('flipped');
-                firstElement.textContent = '';
-                secondElement.textContent = '';
+                firstElement.innerHTML = '';
+                secondElement.innerHTML = '';
                 
                 // Play no match sound
                 playNoMatchSound();
