@@ -199,7 +199,7 @@
         <div class="stats">
             <div>Moves: <span id="moves">0</span></div>
             <div>Time: <span id="time">0s</span></div>
-            <div>Level: <span id="level">1/8</span></div>
+            <div>Level: <span id="level">1/100</span></div>
         </div>
         
         <div class="game-board" id="gameBoard"></div>
@@ -228,19 +228,36 @@
         let audioContext;
         let backgroundMusic = null;
         let currentLevel = 1;
-        let totalLevels = 8;
+        let totalLevels = 100;
         
-        // Famous icons and emojis for each level - exactly 8 pairs (16 cards) each
-        const levelIcons = {
-            1: ['😀', '😂', '🥰', '😎', '🤩', '😍', '🥳', '😜'], // Happy Faces
-            2: ['🍎', '🍌', '🍒', '🍇', '🍊', '🍋', '🍑', '🍓'], // Fruits
-            3: ['⚽', '🏀', '🏈', '⚾', '🎾', '🏐', '🏉', '🎱'], // Sports
-            4: ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼'], // Animals
-            5: ['❤️', '💙', '💚', '💛', '💜', '🧡', '🖤', '🤍'], // Hearts
-            6: ['🍕', '🍔', '🍟', '🌭', '🍦', '🍩', '🎂', '🍫'], // Food
-            7: ['🚀', '✈️', '🚂', '🚗', '🚲', '🚁', '🚢', '🏍️'], // Vehicles
-            8: ['🌟', '✨', '⭐', '💫', '🔥', '💯', '🎯', '🏆'] // Stars & Awards
+        // Generate 100 different emoji sets
+        const generateEmojiSets = () => {
+            const baseEmojis = [
+                '😀', '😂', '🥰', '😎', '🤩', '😍', '🥳', '😜', '🤓', '🤗', '🤑', '🤠', '😈', '👻', '🤖', '👽',
+                '🍎', '🍌', '🍒', '🍇', '🍊', '🍋', '🍑', '🍓', '🍕', '🍔', '🍟', '🌭', '🍦', '🍩', '🎂', '🍫',
+                '⚽', '🏀', '🏈', '⚾', '🎾', '🏐', '🏉', '🎱', '🏓', '🏸', '🏒', '🥅', '⛳', '🏹', '🎣', '🥊',
+                '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🐔',
+                '❤️', '💙', '💚', '💛', '💜', '🧡', '🖤', '🤍', '🤎', '💖', '💗', '💓', '💕', '💞', '💝', '💟',
+                '🚀', '✈️', '🚂', '🚗', '🚲', '🚁', '🚢', '🏍️', '🚌', '🚕', '🚙', '🚚', '🚛', '🚜', '🏎️', '🚓',
+                '🌟', '✨', '⭐', '💫', '🔥', '💯', '🎯', '🏆', '🥇', '🥈', '🥉', '🏅', '🎖️', '🏵️', '🎄', '🎁',
+                '🌈', '☀️', '🌙', '⭐', '☁️', '⚡', '❄️', '⛄', '☂️', '☔', '🌊', '💧', '🔥', '💥', '✨', '💫'
+            ];
+            
+            const emojiSets = {};
+            for (let i = 1; i <= 100; i++) {
+                // Take 8 unique emojis for each level
+                const startIndex = (i - 1) * 2; // Ensure we have enough unique emojis
+                const levelEmojis = [];
+                for (let j = 0; j < 8; j++) {
+                    const emojiIndex = (startIndex + j) % baseEmojis.length;
+                    levelEmojis.push(baseEmojis[emojiIndex]);
+                }
+                emojiSets[i] = levelEmojis;
+            }
+            return emojiSets;
         };
+        
+        const levelIcons = generateEmojiSets();
         
         // Initialize audio context
         function initAudio() {
@@ -360,10 +377,32 @@
         let timer = null;
         let seconds = 0;
         let gameStarted = false;
+        let moveLimit = 0;
+        let timeLimit = 0;
         
         // Get current level icons
         function getCurrentIcons() {
             return levelIcons[currentLevel] || levelIcons[1];
+        }
+        
+        // Get difficulty settings based on level
+        function getDifficultySettings(level) {
+            if (level <= 10) {
+                // Levels 1-10: Normal game (no restrictions)
+                return { moveLimit: 0, timeLimit: 0, description: 'Normal Mode' };
+            } else if (level <= 30) {
+                // Levels 11-30: Move limit of 20
+                return { moveLimit: 20, timeLimit: 0, description: 'Move Limit: 20' };
+            } else if (level <= 60) {
+                // Levels 31-60: Time limit of 60 seconds
+                return { moveLimit: 0, timeLimit: 60, description: 'Time Limit: 60s' };
+            } else if (level <= 80) {
+                // Levels 61-80: Both move limit (25) and time limit (45s)
+                return { moveLimit: 25, timeLimit: 45, description: 'Move: 25, Time: 45s' };
+            } else {
+                // Levels 81-100: Hard mode - move limit (18) and time limit (30s)
+                return { moveLimit: 18, timeLimit: 30, description: 'Hard Mode!' };
+            }
         }
         
         // Initialize the game
@@ -371,6 +410,11 @@
             stopBackgroundMusic();
             const gameBoardElement = document.getElementById('gameBoard');
             gameBoardElement.innerHTML = '';
+            
+            // Get difficulty settings
+            const difficulty = getDifficultySettings(currentLevel);
+            moveLimit = difficulty.moveLimit;
+            timeLimit = difficulty.timeLimit;
             
             // Get icons for current level (always 8 pairs = 16 cards)
             const icons = getCurrentIcons();
@@ -415,7 +459,7 @@
             
             // Update UI
             updateStats();
-            document.getElementById('message').textContent = '';
+            document.getElementById('message').textContent = difficulty.description;
         }
         
         // Flip a card
@@ -423,6 +467,12 @@
             const card = gameBoard[cardId];
             
             if (card.isFlipped || card.isMatched || flippedCards.length >= 2) {
+                return;
+            }
+            
+            // Check move limit
+            if (moveLimit > 0 && moves >= moveLimit) {
+                document.getElementById('message').textContent = '❌ Move limit reached!';
                 return;
             }
             
@@ -497,13 +547,40 @@
             
             // Reset flipped cards array
             flippedCards = [];
+            
+            // Check if move limit is exceeded
+            if (moveLimit > 0 && moves >= moveLimit && matchedPairs < 8) {
+                document.getElementById('message').textContent = '❌ Game Over! Move limit reached.';
+                setTimeout(() => {
+                    resetGame();
+                }, 3000);
+            }
         }
         
         // Start the timer
         function startTimer() {
+            if (timeLimit > 0) {
+                // Show countdown
+                document.getElementById('time').textContent = `${timeLimit}s`;
+            }
+            
             timer = setInterval(() => {
                 seconds++;
                 updateStats();
+                
+                // Check time limit
+                if (timeLimit > 0) {
+                    const remainingTime = timeLimit - seconds;
+                    if (remainingTime <= 0) {
+                        clearInterval(timer);
+                        document.getElementById('message').textContent = '⏰ Time\'s up! Game Over.';
+                        setTimeout(() => {
+                            resetGame();
+                        }, 3000);
+                    } else {
+                        document.getElementById('time').textContent = `${remainingTime}s`;
+                    }
+                }
             }, 1000);
         }
         
@@ -537,7 +614,9 @@
         // Update statistics display
         function updateStats() {
             document.getElementById('moves').textContent = moves;
-            document.getElementById('time').textContent = `${seconds}s`;
+            if (timeLimit === 0) {
+                document.getElementById('time').textContent = `${seconds}s`;
+            }
             document.getElementById('level').textContent = `${currentLevel}/${totalLevels}`;
         }
         
