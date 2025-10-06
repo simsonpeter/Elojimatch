@@ -226,15 +226,167 @@
             cursor: pointer;
         }
         
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .splash-screen.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .splash-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 320px;
+            width: 90%;
+        }
+        
+        .splash-content h2 {
+            color: white;
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+        
+        .splash-content p {
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 20px;
+            font-size: 15px;
+            line-height: 1.4;
+        }
+        
+        .splash-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .shop-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1500;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .shop-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .shop-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 25px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 300px;
+            width: 90%;
+        }
+        
+        .shop-content h2 {
+            color: white;
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+        
+        .shop-items {
+            margin-bottom: 20px;
+        }
+        
+        .shop-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 10px;
+            color: white;
+        }
+        
+        .shop-item button {
+            background: #4ecdc4;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            margin-top: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .shop-btn {
+            background: #4ecdc4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
         .footer {
             color: rgba(255, 255, 255, 0.7);
             font-size: 12px;
             margin-top: 15px;
         }
+        
+        .stars-display {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 15px;
+            color: gold;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .shop-toggle {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 15px;
+            padding: 5px 10px;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
     <div class="game-container">
+        <button class="shop-toggle" onclick="openShop()">🛒 Shop</button>
+        <div class="stars-display" id="starsDisplay">⭐ 0</div>
+        
         <div class="header">
             <span>🎯 Emoji Match Pro</span>
             <button class="sound-toggle" id="soundToggle" onclick="toggleSound()">🔊</button>
@@ -262,21 +414,73 @@
         <div class="level-complete-content">
             <h2>🎉 Level Complete!</h2>
             <p id="levelCompleteMessage">Great job! Ready for the next challenge?</p>
+            <div id="starsEarned" style="color: gold; font-size: 18px; margin-bottom: 15px;"></div>
             <button class="next-level-btn" onclick="nextLevel()">Next Level</button>
+        </div>
+    </div>
+    
+    <div class="splash-screen" id="splashScreen">
+        <div class="splash-content">
+            <h2>Level <span id="splashLevel">1</span> Rules</h2>
+            <p id="splashRules">Normal Mode - No restrictions</p>
+            <button class="splash-btn" onclick="startGameFromSplash()">Start Game</button>
+        </div>
+    </div>
+    
+    <div class="shop-modal" id="shopModal">
+        <div class="shop-content">
+            <h2>⭐ Star Shop</h2>
+            <div class="stars-display" style="position: static; margin-bottom: 15px;">You have: <span id="shopStars">0</span> stars</div>
+            <div class="shop-items">
+                <div class="shop-item">
+                    +5 Extra Moves<br>
+                    <button onclick="buyExtraMoves()">Buy for 10 ⭐</button>
+                </div>
+                <div class="shop-item">
+                    +15 Extra Seconds<br>
+                    <button onclick="buyExtraTime()">Buy for 15 ⭐</button>
+                </div>
+                <div class="shop-item">
+                    Remove Move Limit (1 game)<br>
+                    <button onclick="buyRemoveMoveLimit()">Buy for 25 ⭐</button>
+                </div>
+                <div class="shop-item">
+                    Remove Time Limit (1 game)<br>
+                    <button onclick="buyRemoveTimeLimit()">Buy for 25 ⭐</button>
+                </div>
+            </div>
+            <button class="shop-btn" onclick="closeShop()">Close Shop</button>
         </div>
     </div>
 
     <script>
-        // Sound management
+        // Game state
         let soundEnabled = true;
         let audioContext;
         let backgroundMusic = null;
         let currentLevel = 1;
         let totalLevels = 100;
+        let totalStars = 0;
+        let extraMoves = 0;
+        let extraTime = 0;
+        let removeMoveLimit = false;
+        let removeTimeLimit = false;
         
-        // Generate 100 different emoji sets with animated emojis
+        // Game variables
+        let gameBoard = [];
+        let flippedCards = [];
+        let matchedPairs = 0;
+        let moves = 0;
+        let timer = null;
+        let seconds = 0;
+        let gameStarted = false;
+        let moveLimit = 0;
+        let timeLimit = 0;
+        let baseMoveLimit = 0;
+        let baseTimeLimit = 0;
+        
+        // Generate 100 different emoji sets
         const generateEmojiSets = () => {
-            // Using standard Unicode emojis that are copyright-free
             const baseEmojis = [
                 '😀', '😂', '🥰', '😎', '🤩', '😍', '🥳', '😜', '🤓', '🤗', '🤑', '🤠', '😈', '👻', '🤖', '👽',
                 '🍎', '🍌', '🍒', '🍇', '🍊', '🍋', '🍑', '🍓', '🍕', '🍔', '🍟', '🌭', '🍦', '🍩', '🎂', '🍫',
@@ -292,8 +496,7 @@
             
             const emojiSets = {};
             for (let i = 1; i <= 100; i++) {
-                // Take 8 unique emojis for each level
-                const startIndex = (i - 1) * 3; // Ensure we have enough unique emojis
+                const startIndex = (i - 1) * 3;
                 const levelEmojis = [];
                 for (let j = 0; j < 8; j++) {
                     const emojiIndex = (startIndex + j) % baseEmojis.length;
@@ -340,7 +543,7 @@
             }
         }
         
-        // Background music (continuous)
+        // Background music
         function playBackgroundMusic() {
             if (!soundEnabled || backgroundMusic) return;
             
@@ -364,14 +567,12 @@
                 oscillator.start();
                 oscillator.stop(audioContext.currentTime + 8);
                 
-                // Loop continuously
                 backgroundMusic = setTimeout(playBackgroundMusic, 8000);
             } catch (e) {
                 console.log('Background music error:', e);
             }
         }
         
-        // Stop background music
         function stopBackgroundMusic() {
             if (backgroundMusic) {
                 clearTimeout(backgroundMusic);
@@ -379,21 +580,11 @@
             }
         }
         
-        // Specific sound effects
-        function playCardFlipSound() {
-            playSound(600, 0.1, 'sine');
-        }
-        
-        function playMatchSound() {
-            playSound(800, 0.3, 'sine');
-            setTimeout(() => playSound(1000, 0.3, 'sine'), 100);
-        }
-        
-        function playNoMatchSound() {
-            playSound(300, 0.2, 'sawtooth');
-        }
-        
-        function playWinSound() {
+        // Sound effects
+        function playCardFlipSound() { playSound(600, 0.1, 'sine'); }
+        function playMatchSound() { playSound(800, 0.3, 'sine'); setTimeout(() => playSound(1000, 0.3, 'sine'), 100); }
+        function playNoMatchSound() { playSound(300, 0.2, 'sawtooth'); }
+        function playWinSound() { 
             playSound(500, 0.2, 'sine');
             setTimeout(() => playSound(700, 0.2, 'sine'), 150);
             setTimeout(() => playSound(900, 0.2, 'sine'), 300);
@@ -406,9 +597,7 @@
             if (soundEnabled) {
                 soundToggle.textContent = '🔊';
                 soundToggle.classList.remove('muted');
-                if (gameStarted) {
-                    playBackgroundMusic();
-                }
+                if (gameStarted) playBackgroundMusic();
             } else {
                 soundToggle.textContent = '🔇';
                 soundToggle.classList.add('muted');
@@ -416,39 +605,77 @@
             }
         }
         
-        // Game variables
-        let gameBoard = [];
-        let flippedCards = [];
-        let matchedPairs = 0;
-        let moves = 0;
-        let timer = null;
-        let seconds = 0;
-        let gameStarted = false;
-        let moveLimit = 0;
-        let timeLimit = 0;
-        
-        // Get current level icons
-        function getCurrentIcons() {
-            return levelIcons[currentLevel] || levelIcons[1];
-        }
-        
-        // Get difficulty settings based on level
+        // Get difficulty settings
         function getDifficultySettings(level) {
             if (level <= 10) {
-                // Levels 1-10: Normal game (no restrictions)
-                return { moveLimit: 0, timeLimit: 0, description: 'Normal Mode' };
+                return { moveLimit: 0, timeLimit: 0, description: 'Normal Mode', splashText: 'Normal Mode - No restrictions' };
             } else if (level <= 30) {
-                // Levels 11-30: Move limit of 20
-                return { moveLimit: 20, timeLimit: 0, description: 'Move Limit: 20' };
+                return { moveLimit: 20, timeLimit: 0, description: 'Move Limit: 20', splashText: 'You have only 20 moves to complete this level!' };
             } else if (level <= 60) {
-                // Levels 31-60: Time limit of 60 seconds
-                return { moveLimit: 0, timeLimit: 60, description: 'Time Limit: 60s' };
+                return { moveLimit: 0, timeLimit: 60, description: 'Time Limit: 60s', splashText: 'Complete within 60 seconds!' };
             } else if (level <= 80) {
-                // Levels 61-80: Both move limit (25) and time limit (45s)
-                return { moveLimit: 25, timeLimit: 45, description: 'Move: 25, Time: 45s' };
+                return { moveLimit: 25, timeLimit: 45, description: 'Move: 25, Time: 45s', splashText: 'Challenging! 25 moves and 45 seconds only!' };
             } else {
-                // Levels 81-100: Hard mode - move limit (18) and time limit (30s)
-                return { moveLimit: 18, timeLimit: 30, description: 'Hard Mode!' };
+                return { moveLimit: 18, timeLimit: 30, description: 'Hard Mode!', splashText: 'Extreme Challenge! Only 18 moves and 30 seconds!' };
+            }
+        }
+        
+        // Calculate stars earned
+        function calculateStarsEarned() {
+            const difficulty = getDifficultySettings(currentLevel);
+            let stars = 0;
+            
+            // Base stars for completing level
+            stars += 5;
+            
+            // Bonus for moves saved
+            if (difficulty.moveLimit > 0) {
+                const movesSaved = difficulty.moveLimit - moves;
+                if (movesSaved > 0) {
+                    stars += Math.floor(movesSaved * 0.5);
+                }
+            }
+            
+            // Bonus for time saved
+            if (difficulty.timeLimit > 0) {
+                const timeSaved = difficulty.timeLimit - seconds;
+                if (timeSaved > 0) {
+                    stars += Math.floor(timeSaved * 0.3);
+                }
+            }
+            
+            // Bonus for perfect completion
+            if (moves === 8 && difficulty.moveLimit === 0 && difficulty.timeLimit === 0) {
+                stars += 10; // Perfect in normal mode
+            }
+            
+            return Math.max(stars, 1); // Minimum 1 star
+        }
+        
+        // Save game state (would work in real browser)
+        function saveGameState() {
+            try {
+                const gameState = {
+                    currentLevel: currentLevel,
+                    totalStars: totalStars
+                };
+                // localStorage.setItem('emojiMatchGameState', JSON.stringify(gameState));
+            } catch (e) {
+                console.log('Save failed:', e);
+            }
+        }
+        
+        // Load game state (would work in real browser)
+        function loadGameState() {
+            try {
+                // const saved = localStorage.getItem('emojiMatchGameState');
+                // if (saved) {
+                //     const gameState = JSON.parse(saved);
+                //     currentLevel = gameState.currentLevel || 1;
+                //     totalStars = gameState.totalStars || 0;
+                // }
+            } catch (e) {
+                console.log('Load failed:', e);
             }
         }
         
@@ -458,15 +685,24 @@
             const gameBoardElement = document.getElementById('gameBoard');
             gameBoardElement.innerHTML = '';
             
-            // Get difficulty settings
+            // Apply shop bonuses
             const difficulty = getDifficultySettings(currentLevel);
-            moveLimit = difficulty.moveLimit;
-            timeLimit = difficulty.timeLimit;
+            baseMoveLimit = difficulty.moveLimit;
+            baseTimeLimit = difficulty.timeLimit;
             
-            // Get icons for current level (always 8 pairs = 16 cards)
-            const icons = getCurrentIcons();
+            moveLimit = removeMoveLimit ? 0 : (baseMoveLimit + extraMoves);
+            timeLimit = removeTimeLimit ? 0 : (baseTimeLimit + extraTime);
             
-            // Create pairs (8 pairs = 16 cards total)
+            // Reset shop bonuses after use
+            extraMoves = 0;
+            extraTime = 0;
+            removeMoveLimit = false;
+            removeTimeLimit = false;
+            
+            // Get icons
+            const icons = levelIcons[currentLevel] || levelIcons[1];
+            
+            // Create pairs
             let iconPairs = [...icons, ...icons];
             
             // Shuffle
@@ -475,7 +711,7 @@
                 [iconPairs[i], iconPairs[j]] = [iconPairs[j], iconPairs[i]];
             }
             
-            // Create game board - always 4x4 grid (16 cards)
+            // Create game board
             gameBoard = iconPairs.map((icon, index) => ({
                 id: index,
                 icon: icon,
@@ -483,7 +719,7 @@
                 isMatched: false
             }));
             
-            // Render cards with animated emojis
+            // Render cards
             gameBoard.forEach(card => {
                 const cardElement = document.createElement('div');
                 cardElement.className = 'card';
@@ -507,6 +743,24 @@
             // Update UI
             updateStats();
             document.getElementById('message').textContent = difficulty.description;
+            updateStarsDisplay();
+        }
+        
+        // Show splash screen for special levels
+        function showSplashScreen() {
+            const difficulty = getDifficultySettings(currentLevel);
+            if (currentLevel > 10) { // Show splash for levels 11+
+                document.getElementById('splashLevel').textContent = currentLevel;
+                document.getElementById('splashRules').textContent = difficulty.splashText;
+                document.getElementById('splashScreen').classList.add('show');
+            } else {
+                initGame();
+            }
+        }
+        
+        function startGameFromSplash() {
+            document.getElementById('splashScreen').classList.remove('show');
+            initGame();
         }
         
         // Flip a card
@@ -563,7 +817,6 @@
             const secondCard = gameBoard[secondId];
             
             if (firstCard.icon === secondCard.icon) {
-                // Match found
                 firstCard.isMatched = true;
                 secondCard.isMatched = true;
                 matchedPairs++;
@@ -573,15 +826,12 @@
                 firstElement.classList.add('matched');
                 secondElement.classList.add('matched');
                 
-                // Play match sound
                 playMatchSound();
                 
-                // Check if level is complete (8 pairs = 8 matches)
                 if (matchedPairs === 8) {
                     endLevel();
                 }
             } else {
-                // No match - flip cards back
                 firstCard.isFlipped = false;
                 secondCard.isFlipped = false;
                 
@@ -592,26 +842,20 @@
                 firstElement.innerHTML = '';
                 secondElement.innerHTML = '';
                 
-                // Play no match sound
                 playNoMatchSound();
             }
             
-            // Reset flipped cards array
             flippedCards = [];
             
-            // Check if move limit is exceeded
             if (moveLimit > 0 && moves >= moveLimit && matchedPairs < 8) {
                 document.getElementById('message').textContent = '❌ Game Over! Move limit reached.';
-                setTimeout(() => {
-                    resetGame();
-                }, 3000);
+                setTimeout(() => resetGame(), 3000);
             }
         }
         
         // Start the timer
         function startTimer() {
             if (timeLimit > 0) {
-                // Show countdown
                 document.getElementById('time').textContent = `${timeLimit}s`;
             }
             
@@ -619,15 +863,12 @@
                 seconds++;
                 updateStats();
                 
-                // Check time limit
                 if (timeLimit > 0) {
                     const remainingTime = timeLimit - seconds;
                     if (remainingTime <= 0) {
                         clearInterval(timer);
                         document.getElementById('message').textContent = '⏰ Time\'s up! Game Over.';
-                        setTimeout(() => {
-                            resetGame();
-                        }, 3000);
+                        setTimeout(() => resetGame(), 3000);
                     } else {
                         document.getElementById('time').textContent = `${remainingTime}s`;
                     }
@@ -640,26 +881,32 @@
             clearInterval(timer);
             stopBackgroundMusic();
             
+            const starsEarned = calculateStarsEarned();
+            totalStars += starsEarned;
+            saveGameState();
+            
             playWinSound();
             
             if (currentLevel < totalLevels) {
-                // Show level complete modal
                 const levelComplete = document.getElementById('levelComplete');
                 const message = document.getElementById('levelCompleteMessage');
-                message.innerHTML = `Level ${currentLevel} Complete!<br>Moves: ${moves}<br>Time: ${seconds}s<br>🎉 Awesome!`;
+                message.innerHTML = `Level ${currentLevel} Complete!<br>Moves: ${moves}<br>Time: ${seconds}s`;
+                document.getElementById('starsEarned').innerHTML = `⭐ +${starsEarned} Stars!`;
                 levelComplete.classList.add('show');
             } else {
-                // Game complete
                 document.getElementById('message').textContent = `🏆 Game Complete! All ${totalLevels} levels finished!`;
             }
+            
+            updateStarsDisplay();
         }
         
         // Go to next level
         function nextLevel() {
             currentLevel++;
+            saveGameState();
             const levelComplete = document.getElementById('levelComplete');
             levelComplete.classList.remove('show');
-            initGame();
+            showSplashScreen();
         }
         
         // Update statistics display
@@ -671,23 +918,88 @@
             document.getElementById('level').textContent = `${currentLevel}/${totalLevels}`;
         }
         
+        // Update stars display
+        function updateStarsDisplay() {
+            document.getElementById('starsDisplay').textContent = `⭐ ${totalStars}`;
+            document.getElementById('shopStars').textContent = totalStars;
+        }
+        
         // Reset the current game
         function resetGame() {
             clearInterval(timer);
             stopBackgroundMusic();
-            initGame();
+            showSplashScreen();
         }
         
         // Start a new game
         function newGame() {
             currentLevel = 1;
-            initGame();
+            saveGameState();
+            showSplashScreen();
+        }
+        
+        // Shop functions
+        function openShop() {
+            document.getElementById('shopModal').classList.add('show');
+            updateStarsDisplay();
+        }
+        
+        function closeShop() {
+            document.getElementById('shopModal').classList.remove('show');
+        }
+        
+        function buyExtraMoves() {
+            if (totalStars >= 10) {
+                totalStars -= 10;
+                extraMoves += 5;
+                saveGameState();
+                updateStarsDisplay();
+                alert('✅ +5 Extra Moves purchased!');
+            } else {
+                alert('❌ Not enough stars! Need 10 stars.');
+            }
+        }
+        
+        function buyExtraTime() {
+            if (totalStars >= 15) {
+                totalStars -= 15;
+                extraTime += 15;
+                saveGameState();
+                updateStarsDisplay();
+                alert('✅ +15 Extra Seconds purchased!');
+            } else {
+                alert('❌ Not enough stars! Need 15 stars.');
+            }
+        }
+        
+        function buyRemoveMoveLimit() {
+            if (totalStars >= 25) {
+                totalStars -= 25;
+                removeMoveLimit = true;
+                saveGameState();
+                updateStarsDisplay();
+                alert('✅ Move limit removed for this game!');
+            } else {
+                alert('❌ Not enough stars! Need 25 stars.');
+            }
+        }
+        
+        function buyRemoveTimeLimit() {
+            if (totalStars >= 25) {
+                totalStars -= 25;
+                removeTimeLimit = true;
+                saveGameState();
+                updateStarsDisplay();
+                alert('✅ Time limit removed for this game!');
+            } else {
+                alert('❌ Not enough stars! Need 25 stars.');
+            }
         }
         
         // Initialize the game when page loads
         window.onload = function() {
-            initGame();
-            // Initialize audio on first interaction
+            // loadGameState(); // Would work in real browser
+            showSplashScreen();
             document.body.addEventListener('touchstart', initAudio, { once: true });
             document.body.addEventListener('click', initAudio, { once: true });
         };
