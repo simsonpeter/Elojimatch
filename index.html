@@ -90,6 +90,7 @@
         
         .game-board {
             display: grid;
+            grid-template-columns: repeat(4, 1fr);
             gap: 8px;
             margin-bottom: 15px;
             flex: 1;
@@ -97,30 +98,17 @@
             overflow: hidden;
         }
         
-        /* Level-specific grid layouts */
-        .game-board.level-1,
-        .game-board.level-2 {
-            grid-template-columns: repeat(4, 1fr);
-        }
-        
-        .game-board.level-3,
-        .game-board.level-4,
-        .game-board.level-5 {
-            grid-template-columns: repeat(5, 1fr);
-        }
-        
         .card {
+            aspect-ratio: 1;
             background: rgba(255, 255, 255, 0.3);
             border-radius: 10px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 22px;
+            font-size: 24px;
             cursor: pointer;
             color: transparent;
             transition: all 0.2s ease;
-            min-height: 45px;
-            min-width: 45px;
             border: 2px solid transparent;
         }
         
@@ -267,9 +255,7 @@
         /* Optimized for small screens */
         @media (max-width: 320px) {
             .card {
-                font-size: 18px;
-                min-height: 40px;
-                min-width: 40px;
+                font-size: 20px;
                 border-radius: 8px;
             }
             
@@ -285,13 +271,6 @@
                 padding: 6px 10px;
                 font-size: 11px;
             }
-            
-            .game-board.level-3,
-            .game-board.level-4,
-            .game-board.level-5 {
-                grid-template-columns: repeat(5, 1fr);
-                gap: 6px;
-            }
         }
         
         @media (max-height: 600px) {
@@ -302,8 +281,6 @@
             
             .card {
                 font-size: 18px;
-                min-height: 38px;
-                min-width: 38px;
             }
             
             .stats {
@@ -318,9 +295,7 @@
         
         @media (min-width: 400px) and (min-height: 700px) {
             .card {
-                font-size: 24px;
-                min-height: 50px;
-                min-width: 50px;
+                font-size: 26px;
             }
             
             .header {
@@ -347,7 +322,7 @@
             </div>
             <div>
                 <div class="stat-label">Level:</div>
-                <div class="stat-value level-value" id="level">1/5</div>
+                <div class="stat-value level-value" id="level">1/8</div>
             </div>
         </div>
         
@@ -377,15 +352,18 @@
         let audioContext;
         let backgroundMusic = null;
         let currentLevel = 1;
-        let totalLevels = 5;
+        let totalLevels = 8;
         
-        // Famous icons and emojis for each level - optimized for screen fit
+        // Famous icons and emojis for each level - exactly 8 pairs (16 cards) each
         const levelIcons = {
-            1: ['😀', '😂', '🥰', '😎', '🤩', '😍', '🥳', '😜'], // 8 pairs (16 cards) - 4x4 grid
-            2: ['🍎', '🍌', '🍒', '🍇', '🍕', '🍔', '🍟', '🌭', '🍦', '🍩', '🎂', '🍫'], // 12 pairs (24 cards) - 4x6 grid
-            3: ['⚽', '🏀', '🏈', '⚾', '🎾', '🏐', '🏉', '🎱', '🏓', '🏸'], // 10 pairs (20 cards) - 5x4 grid
-            4: ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵'], // 15 pairs (30 cards) - 5x6 grid
-            5: ['❤️', '💙', '💚', '💛', '💜', '🧡', '🖤', '🤍', '🤎', '💖', '💗', '💓', '💕', '💞', '💝', '💟'] // 16 pairs (32 cards) - 5x7 grid (last row has 2 empty)
+            1: ['😀', '😂', '🥰', '😎', '🤩', '😍', '🥳', '😜'], // Happy Faces
+            2: ['🍎', '🍌', '🍒', '🍇', '🍊', '🍋', '🍑', '🍓'], // Fruits
+            3: ['⚽', '🏀', '🏈', '⚾', '🎾', '🏐', '🏉', '🎱'], // Sports
+            4: ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼'], // Animals
+            5: ['❤️', '💙', '💚', '💛', '💜', '🧡', '🖤', '🤍'], // Hearts
+            6: ['🍕', '🍔', '🍟', '🌭', '🍦', '🍩', '🎂', '🍫'], // Food
+            7: ['🚀', '✈️', '🚂', '🚗', '🚲', '🚁', '🚢', '🏍️'], // Vehicles
+            8: ['🌟', '✨', '⭐', '💫', '🔥', '💯', '🎯', '🏆'] // Stars & Awards
         };
         
         // Initialize audio context
@@ -526,10 +504,10 @@
             const gameBoardElement = document.getElementById('gameBoard');
             gameBoardElement.innerHTML = '';
             
-            // Get icons for current level
+            // Get icons for current level (always 8 pairs = 16 cards)
             const icons = getCurrentIcons();
             
-            // Create pairs
+            // Create pairs (8 pairs = 16 cards total)
             let iconPairs = [...icons, ...icons];
             
             // Shuffle
@@ -538,11 +516,7 @@
                 [iconPairs[i], iconPairs[j]] = [iconPairs[j], iconPairs[i]];
             }
             
-            // Set grid layout based on level
-            gameBoardElement.className = 'game-board';
-            gameBoardElement.classList.add(`level-${currentLevel}`);
-            
-            // Create game board
+            // Create game board - always 4x4 grid (16 cards)
             gameBoard = iconPairs.map((icon, index) => ({
                 id: index,
                 icon: icon,
@@ -634,9 +608,8 @@
                 // Play match sound
                 playMatchSound();
                 
-                // Check if level is complete
-                const totalPairs = getCurrentIcons().length;
-                if (matchedPairs === totalPairs) {
+                // Check if level is complete (8 pairs = 8 matches)
+                if (matchedPairs === 8) {
                     endLevel();
                 }
             } else {
