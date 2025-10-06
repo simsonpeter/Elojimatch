@@ -36,16 +36,12 @@
         
         .header {
             color: white;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             font-size: 24px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
         }
         
-        .top-controls {
+        .top-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -53,12 +49,23 @@
             padding: 0 10px;
         }
         
-        .title-section {
-            flex: 1;
-            text-align: center;
+        .sound-toggle {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: white;
+            font-size: 16px;
         }
         
-        
+        .sound-toggle.muted {
+            opacity: 0.6;
+        }
         
         .stars-display {
             background: rgba(255, 255, 255, 0.2);
@@ -67,9 +74,6 @@
             color: gold;
             font-weight: bold;
             font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
         }
         
         .shop-toggle {
@@ -80,9 +84,6 @@
             color: white;
             cursor: pointer;
             font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
         }
         
         .stats {
@@ -382,20 +383,18 @@
 </head>
 <body>
     <div class="game-container">
-        <div class="top-controls">
-            <button class="shop-toggle" onclick="openShop()">🛒 Shop</button>
-            <div class="title-section">
-                <div class="header">
-                    <span>Emoji Match</span>
-                    <button class="sound-toggle" id="soundToggle" onclick="toggleSound()">🔊</button>
-                </div>
-            </div>
+        <div class="header">
+            🎯 Emoji Match Pro
+        </div>
+        
+        <div class="top-row">
+            <button class="shop-toggle" onclick="openShop()">Shop</button>
             <div class="stars-display" id="starsDisplay">⭐ 0</div>
         </div>
         
         <div class="stats">
-            <div>Moves: <span id="moves">0</span></div>
-            <div>Time: <span id="time">0s</span></div>
+            <div>Score: <span id="score">0</span></div>
+            <div>High Score: <span id="highScore">0</span></div>
             <div>Level: <span id="level">1/100</span></div>
         </div>
         
@@ -468,6 +467,8 @@
         let extraTime = 0;
         let removeMoveLimit = false;
         let removeTimeLimit = false;
+        let currentScore = 0;
+        let highScore = 0;
         
         // Game variables
         let gameBoard = [];
@@ -655,12 +656,37 @@
             return Math.max(stars, 1); // Minimum 1 star
         }
         
+        // Calculate score
+        function calculateScore() {
+            const difficulty = getDifficultySettings(currentLevel);
+            let score = 1000; // Base score
+            
+            // Deduct for moves
+            score -= (moves * 10);
+            
+            // Deduct for time
+            score -= (seconds * 5);
+            
+            // Bonus for difficulty level
+            if (currentLevel > 10) score += 200;
+            if (currentLevel > 30) score += 300;
+            if (currentLevel > 60) score += 400;
+            if (currentLevel > 80) score += 500;
+            
+            // Bonus for stars earned
+            const stars = calculateStarsEarned();
+            score += (stars * 20);
+            
+            return Math.max(score, 0);
+        }
+        
         // Save game state (would work in real browser)
         function saveGameState() {
             try {
                 const gameState = {
                     currentLevel: currentLevel,
-                    totalStars: totalStars
+                    totalStars: totalStars,
+                    highScore: highScore
                 };
                 // localStorage.setItem('emojiMatchGameState', JSON.stringify(gameState));
             } catch (e) {
@@ -676,6 +702,7 @@
                 //     const gameState = JSON.parse(saved);
                 //     currentLevel = gameState.currentLevel || 1;
                 //     totalStars = gameState.totalStars || 0;
+                //     highScore = gameState.highScore || 0;
                 // }
             } catch (e) {
                 console.log('Load failed:', e);
@@ -740,6 +767,7 @@
             matchedPairs = 0;
             moves = 0;
             seconds = 0;
+            currentScore = 0;
             gameStarted = false;
             clearInterval(timer);
             
@@ -886,6 +914,10 @@
             
             const starsEarned = calculateStarsEarned();
             totalStars += starsEarned;
+            currentScore = calculateScore();
+            if (currentScore > highScore) {
+                highScore = currentScore;
+            }
             saveGameState();
             
             playWinSound();
@@ -893,7 +925,7 @@
             if (currentLevel < totalLevels) {
                 const levelComplete = document.getElementById('levelComplete');
                 const message = document.getElementById('levelCompleteMessage');
-                message.innerHTML = `Level ${currentLevel} Complete!<br>Moves: ${moves}<br>Time: ${seconds}s`;
+                message.innerHTML = `Level ${currentLevel} Complete!<br>Score: ${currentScore}<br>Moves: ${moves}<br>Time: ${seconds}s`;
                 document.getElementById('starsEarned').innerHTML = `⭐ +${starsEarned} Stars!`;
                 levelComplete.classList.add('show');
             } else {
@@ -901,6 +933,7 @@
             }
             
             updateStarsDisplay();
+            updateStats();
         }
         
         // Go to next level
@@ -914,10 +947,9 @@
         
         // Update statistics display
         function updateStats() {
-            document.getElementById('moves').textContent = moves;
-            if (timeLimit === 0) {
-                document.getElementById('time').textContent = `${seconds}s`;
-            }
+            currentScore = calculateScore();
+            document.getElementById('score').textContent = currentScore;
+            document.getElementById('highScore').textContent = highScore;
             document.getElementById('level').textContent = `${currentLevel}/${totalLevels}`;
         }
         
