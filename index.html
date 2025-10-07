@@ -569,7 +569,6 @@
                     lastPlayed: new Date().toISOString()
                 };
                 localStorage.setItem('emojiMatchGameState', JSON.stringify(gameState));
-                console.log('Game state saved successfully');
             } catch (e) {
                 console.log('Save failed:', e);
             }
@@ -584,7 +583,6 @@
                     currentLevel = gameState.currentLevel || 1;
                     totalStars = gameState.totalStars || 0;
                     highScore = gameState.highScore || 0;
-                    console.log('Game state loaded successfully');
                     return true;
                 }
                 return false;
@@ -594,35 +592,109 @@
             }
         }
         
-        // Generate 100 different emoji sets
-        const generateEmojiSets = () => {
-            const baseEmojis = [
-                '😀', '😂', '🥰', '😎', '🤩', '😍', '🥳', '😜', '🤓', '🤗', '🤑', '🤠', '😈', '👻', '🤖', '👽',
-                '🍎', '🍌', '🍒', '🍇', '🍊', '🍋', '🍑', '🍓', '🍕', '🍔', '🍟', '🌭', '🍦', '🍩', '🎂', '🍫',
-                '⚽', '🏀', '🏈', '⚾', '🎾', '🏐', '🏉', '🎱', '🏓', '🏸', '🏒', '🥅', '⛳', '🏹', '🎣', '🥊',
-                '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🐔',
-                '❤️', '💙', '💚', '💛', '💜', '🧡', '🖤', '🤍', '🤎', '💖', '💗', '💓', '💕', '💞', '💝', '💟',
-                '🚀', '✈️', '🚂', '🚗', '🚲', '🚁', '🚢', '🏍️', '🚌', '🚕', '🚙', '🚚', '🚛', '🚜', '🏎️', '🚓',
-                '🌟', '✨', '⭐', '💫', '🔥', '💯', '🎯', '🏆', '🥇', '🥈', '🥉', '🏅', '🎖️', '🏵️', '🎄', '🎁',
-                '🌈', '☀️', '🌙', '⭐', '☁️', '⚡', '❄️', '⛄', '☂️', '☔', '🌊', '💧', '🔥', '💥', '✨', '💫',
-                '🎭', '🎨', '🎬', '🎤', '🎧', '🎼', '🎹', '🥁', '🎷', '🎺', '🎸', '🎻', '🎲', '♟️', '🎯', '🎳',
-                '🧩', '🧸', '🎮', '🕹️', '🎲', '♠️', '♥️', '♦️', '♣️', '🃏', '🀄', '🎴', '🎭', '🖼️', '🎨', '🧵'
-            ];
-            
-            const emojiSets = {};
-            for (let i = 1; i <= 100; i++) {
-                const startIndex = (i - 1) * 3;
-                const levelEmojis = [];
-                for (let j = 0; j < 8; j++) {
-                    const emojiIndex = (startIndex + j) % baseEmojis.length;
-                    levelEmojis.push(baseEmojis[emojiIndex]);
-                }
-                emojiSets[i] = levelEmojis;
-            }
-            return emojiSets;
+        // FIXED: Pre-defined emoji sets for all 100 levels
+        const levelIcons = {
+            1: ['😀', '😂', '🥰', '😎', '🤩', '😍', '🥳', '😜'],
+            2: ['🍎', '🍌', '🍒', '🍇', '🍊', '🍋', '🍑', '🍓'],
+            3: ['⚽', '🏀', '🏈', '⚾', '🎾', '🏐', '🏉', '🎱'],
+            4: ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼'],
+            5: ['❤️', '💙', '💚', '💛', '💜', '🧡', '🖤', '🤍'],
+            6: ['🍕', '🍔', '🍟', '🌭', '🍦', '🍩', '🎂', '🍫'],
+            7: ['🚀', '✈️', '🚂', '🚗', '🚲', '🚁', '🚢', '🏍️'],
+            8: ['🌟', '✨', '⭐', '💫', '🔥', '💯', '🎯', '🏆'],
+            9: ['🎭', '🎨', '🎬', '🎤', '🎧', '🎼', '🎹', '🥁'],
+            10: ['🌈', '☀️', '🌙', '⭐', '☁️', '⚡', '❄️', '⛄'],
+            11: ['🤓', '🤗', '🤑', '🤠', '😈', '👻', '🤖', '👽'],
+            12: ['🍉', '🍈', '🍊', '🍋', '🍌', '🍍', '🥭', '🍎'],
+            13: ['🥎', '🎾', '🏐', '🏉', '🥏', '🎱', '🏓', '🏸'],
+            14: ['🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🐔'],
+            15: ['🤎', '💖', '💗', '💓', '💕', '💞', '💝', '💟'],
+            16: ['🍿', '🧃', '🧉', '🧊', '🥡', '🍱', '🍘', '🍙'],
+            17: ['🚌', '🚕', '🚙', '🚚', '🚛', '🚜', '🏎️', '🚓'],
+            18: ['🥇', '🥈', '🥉', '🏅', '🎖️', '🏵️', '🎄', '🎁'],
+            19: ['🎷', '🎺', '🎸', '🎻', '🎲', '♟️', '🎯', '🎳'],
+            20: ['☂️', '☔', '🌊', '💧', '🔥', '💥', '✨', '💫'],
+            21: ['👾', '👋', '👍', '👏', '🙌', '👐', '🤝', '🙏'],
+            22: ['🍏', '🍐', '🍑', '🍒', '🍓', '🥝', '🍅', '🥥'],
+            23: ['🥍', '🏒', '🥌', '⛳', '🏹', '🎣', '🥊', '🥋'],
+            24: ['🐧', '🦄', '🐝', '🦋', '🐌', '🐞', '🦟', '🦠'],
+            25: ['🌈', '💡', '🔋', '🔌', '💻', '🖥️', '🖨️', '🖱️'],
+            26: ['🍪', '🥠', '🥮', '🍰', '🧁', '🥧', '🍫', '🍬'],
+            27: ['🚑', '🚒', '🚓', '🚕', '🚗', '🚙', '🚌', '🚎'],
+            28: ['🎉', '🎊', '🎈', '🎂', '🎁', '🎀', '🏆', '🏅'],
+            29: ['🎮', '🕹️', '🎰', '🎲', '🧩', '🧸', '♟️', '🃏'],
+            30: ['💨', '🌬️', '🌪️', '🌫️', '🌊', '💧', '☔', '⚡'],
+            31: ['😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣'],
+            32: ['😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰'],
+            33: ['😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜'],
+            34: ['🤪', '🤨', '🧐', '🤓', '😎', '🥸', '🤩', '🥳'],
+            35: ['😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️'],
+            36: ['😣', '😖', '😫', '😩', '🥺', '😢', '😭', '😤'],
+            37: ['😠', '😡', '🤬', '🤯', '😳', '🥵', '🥶', '😱'],
+            38: ['😨', '😰', '😥', '😓', '🤗', '🤔', '🤭', '🤫'],
+            39: ['🤥', '😶', '😐', '😑', '😬', '🙄', '😯', '😦'],
+            40: ['😧', '😮', '😲', '🥱', '😴', '🤤', '😪', '😵'],
+            41: ['🤐', '🥴', '🤢', '🤮', '🤧', '😷', '🤒', '🤕'],
+            42: ['🤑', '🤠', '😈', '👿', '👹', '👺', '🤡', '💩'],
+            43: ['👻', '💀', '☠️', '👽', '👾', '🤖', '🎃', '😺'],
+            44: ['😸', '😹', '😻', '😼', '😽', '🙀', '😿', '😾'],
+            45: ['🙈', '🙉', '🙊', '💌', '💘', '💝', '💖', '💗'],
+            46: ['💓', '💞', '💕', '💟', '❣️', '💔', '❤️‍🔥', '❤️‍🩹'],
+            47: ['❤️', '🧡', '💛', '💚', '💙', '💜', '🤎', '🖤'],
+            48: ['🤍', '🌈', '✨', '🌟', '⭐', '💫', '🔥', '💥'],
+            49: ['💯', '🎯', '🏆', '🥇', '🥈', '🥉', '🏅', '🎖️'],
+            50: ['🏵️', '.Ribbon', '🎁', '🎄', '🎃', '🧧', '🎀', '🎓'],
+            51: ['⚽', '🏀', '🏈', '⚾', '🥎', '🎾', '🏐', '🏉'],
+            52: ['🥏', '🎱', '🪀', '🏓', '🏸', '🏒', '🥍', '🏏'],
+            53: ['🏑', '🥌', '🛷', '🎿', '⛷️', '🏂', '🏋️', '🤼'],
+            54: ['🤸', '⛹️', '🤺', '🤾', '🏌️', '🏇', '🧘', '🏄'],
+            55: ['🏊', '🤽', '🚣', '🧗', '🚵', '🚴', '🏁', '🚩'],
+            56: ['🎌', '🏴', '🏳️', '🏳️‍🌈', '🇦🇨', '🇦🇩', '🇦🇪', '🇦🇫'],
+            57: ['🍎', '🍐', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓'],
+            58: ['🍈', '🍒', '🍑', '🥭', '🍍', '🥥', '🥝', '🍅'],
+            59: ['🍆', '🥑', '🥦', '🥬', '🥒', '🌶️', '🌽', '🥕'],
+            60: ['🥔', '🍠', '🥐', '🥖', '🍞', '🥨', '🧀', '🥚'],
+            61: ['🍳', '🧈', '🥞', '🧇', '🥓', '🥩', '🍗', '🍖'],
+            62: ['🦴', '🌭', '🍔', '🍟', '🍕', '🥪', '🥙', '🧆'],
+            63: ['🌮', '🌯', '🥗', '🥘', '🍲', '🥣', '🍝', '🍜'],
+            64: ['🍲', '🍛', '🍣', '🍱', '🥟', '🦪', '🍤', '🍙'],
+            65: ['🍚', '🍘', '🍥', '🍧', '🍨', '🍦', '🥧', '🧁'],
+            66: ['🍰', '🎂', '🍮', '🍭', '🍬', '🍫', '🍿', '🍩'],
+            67: ['🍪', '🌰', '🥜', '🍯', '🥛', '🍼', '☕', '🍵'],
+            68: ['🧃', '🥤', '🧋', '🍺', '🍻', '🥂', '🍷', '🥃'],
+            69: ['🍸', '🍹', '🍾', '🧊', '🥄', '🍴', '🍽️', '🥣'],
+            70: ['🥗', '🥘', '🍝', '🍜', '🍲', '🍛', '🍣', '🍱'],
+            71: ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼'],
+            72: ['🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🐔'],
+            73: ['🐧', '🐦', '🐤', '🐣', '🐥', '🦆', '🦅', '🦉'],
+            74: ['🦇', '🐺', '🐗', '🐴', '🦄', '🐝', '🐛', '🦋'],
+            75: ['🐌', '🐞', '🐜', '🦟', '🦗', '🕷️', '🦂', '🐢'],
+            76: ['🐍', '🦎', '🦖', '🦕', '🐙', '🦑', '🦐', '🦞'],
+            77: ['🦀', '🐡', '🐠', '🐟', '🐬', '🐳', '🐋', '🦈'],
+            78: ['🐊', '🐅', '🐆', '🦓', '🦍', '🦧', '🐘', '🦛'],
+            79: ['🦏', '🐪', '🐫', '🦒', '🦘', '🐃', '🐂', '🐄'],
+            80: ['🐎', '🐖', '🐏', '🐑', '🦙', '🐐', '🦌', '🐕'],
+            81: ['🐩', '🐈', '🐇', '🐿️', '🦫', '🦔', '🦇', '🦥'],
+            82: ['🦦', '🦨', '🦘', '🦡', '🐾', '🐉', '🐲', '🌵'],
+            83: ['🎄', '🌲', '🌳', '🌴', '🌱', '🌿', '☘️', '🍀'],
+            84: ['🎍', '🎋', '🍃', '🍂', '🍁', '🍄', '🌾', '💐'],
+            85: ['🌷', '🌹', '🥀', '🌺', '🌸', '🌼', '🌻', '🌞'],
+            86: ['🌝', '🌛', '🌜', '🌚', '🌕', '🌖', '🌗', '🌘'],
+            87: ['🌑', '🌒', '🌓', '🌔', '🌕', '🌖', '🌗', '🌘'],
+            88: ['🌍', '🌎', '🌏', '🌐', '🗺️', '🗾', '🧭', '🏔️'],
+            89: ['⛰️', '🌋', '🗻', '🏕️', '🏖️', '🏜️', '🏝️', '🏞️'],
+            90: ['🏟️', '🏛️', '🏗️', '🧱', '🏘️', '🏚️', '🏠', '🏡'],
+            91: ['🏢', '🏣', '🏤', '🏥', '🏦', '🏨', '🏩', '🏪'],
+            92: ['🏫', '🏬', '🏭', '🏯', '🏰', '💒', '🗼', '🗽'],
+            93: ['⛪', '🕌', '🕍', '⛩️', '🕋', '⛲', '⛺', '🌁'],
+            94: ['🌃', '🏙️', '🌄', '🌅', '🌆', '🌇', '🌉', '♨️'],
+            95: ['🎠', '🎡', '🎢', '💈', '🎪', '🚂', '🚃', '🚄'],
+            96: ['🚅', '🚆', '🚇', '🚈', '🚉', '🚊', '🚝', '🚞'],
+            97: ['🚋', '🚌', '🚍', '🚎', '🚐', '🚑', '🚒', '🚓'],
+            98: ['🚔', '🚕', '🚖', '🚗', '🚘', '🚙', '🛻', '🚚'],
+            99: ['🚛', '🚜', '🏎️', '🏍️', '🛵', '🦽', '🦼', '🛴'],
+            100: ['🚲', '🛴', '🛹', '🛺', '🚏', '🛣️', '🛤️', '🛢️']
         };
-        
-        const levelIcons = generateEmojiSets();
         
         // Initialize audio context
         function initAudio() {
@@ -753,26 +825,38 @@
             return Math.max(stars, 1); // Minimum 1 star
         }
         
-        // Calculate score
+        // Calculate score - FIXED VERSION
         function calculateScore() {
             const difficulty = getDifficultySettings(currentLevel);
-            let score = 1000; // Base score
+            let score = 0;
             
-            // Deduct for moves
-            score -= (moves * 10);
-            
-            // Deduct for time
-            score -= (seconds * 5);
-            
-            // Bonus for difficulty level
-            if (currentLevel > 10) score += 200;
-            if (currentLevel > 30) score += 300;
-            if (currentLevel > 60) score += 400;
-            if (currentLevel > 80) score += 500;
-            
-            // Bonus for stars earned
-            const stars = calculateStarsEarned();
-            score += (stars * 20);
+            // Base score for completing level
+            if (matchedPairs === 8) {
+                score = 1000;
+                
+                // Deduct for moves used
+                score -= (moves * 10);
+                
+                // Deduct for time used
+                score -= (seconds * 5);
+                
+                // Bonus for difficulty
+                if (currentLevel > 10) score += 200;
+                if (currentLevel > 30) score += 300;
+                if (currentLevel > 60) score += 400;
+                if (currentLevel > 80) score += 500;
+                
+                // Bonus for stars earned
+                const stars = calculateStarsEarned();
+                score += (stars * 20);
+            } else {
+                // During gameplay, calculate potential score
+                score = 1000 - (moves * 10) - (seconds * 5);
+                if (currentLevel > 10) score += 200;
+                if (currentLevel > 30) score += 300;
+                if (currentLevel > 60) score += 400;
+                if (currentLevel > 80) score += 500;
+            }
             
             return Math.max(score, 0);
         }
@@ -797,25 +881,44 @@
             removeMoveLimit = false;
             removeTimeLimit = false;
             
-            // Get icons
-            const icons = levelIcons[currentLevel] || levelIcons[1];
+            // Get icons - NOW GUARANTEED TO WORK FOR ALL LEVELS
+            const icons = levelIcons[currentLevel];
             
-            // Create pairs
-            let iconPairs = [...icons, ...icons];
-            
-            // Shuffle
-            for (let i = iconPairs.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [iconPairs[i], iconPairs[j]] = [iconPairs[j], iconPairs[i]];
+            // Validate that we have valid emojis (this should never fail now)
+            if (!icons || icons.length !== 8) {
+                console.error(`Invalid emoji set for level ${currentLevel}`);
+                // Fallback to level 1 emojis
+                const fallbackIcons = levelIcons[1];
+                let iconPairs = [...fallbackIcons, ...fallbackIcons];
+                // Shuffle fallback
+                for (let i = iconPairs.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [iconPairs[i], iconPairs[j]] = [iconPairs[j], iconPairs[i]];
+                }
+                gameBoard = iconPairs.map((icon, index) => ({
+                    id: index,
+                    icon: icon,
+                    isFlipped: false,
+                    isMatched: false
+                }));
+            } else {
+                // Create pairs
+                let iconPairs = [...icons, ...icons];
+                
+                // Shuffle
+                for (let i = iconPairs.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [iconPairs[i], iconPairs[j]] = [iconPairs[j], iconPairs[i]];
+                }
+                
+                // Create game board
+                gameBoard = iconPairs.map((icon, index) => ({
+                    id: index,
+                    icon: icon,
+                    isFlipped: false,
+                    isMatched: false
+                }));
             }
-            
-            // Create game board
-            gameBoard = iconPairs.map((icon, index) => ({
-                id: index,
-                icon: icon,
-                isFlipped: false,
-                isMatched: false
-            }));
             
             // Render cards
             gameBoard.forEach(card => {
@@ -904,7 +1007,7 @@
             // Check for match if two cards are flipped
             if (flippedCards.length === 2) {
                 moves++;
-                updateStats();
+                updateStats(); // Update stats immediately when moves increase
                 setTimeout(checkMatch, 500);
             }
         }
@@ -945,11 +1048,7 @@
             }
             
             flippedCards = [];
-            
-            if (moveLimit > 0 && moves >= moveLimit && matchedPairs < 8) {
-                document.getElementById('message').textContent = '❌ Game Over! Move limit reached.';
-                setTimeout(() => resetGame(), 3000);
-            }
+            updateStats(); // Update stats after match check
         }
         
         // Start the timer
@@ -960,7 +1059,7 @@
             
             timer = setInterval(() => {
                 seconds++;
-                updateStats();
+                updateStats(); // Update stats every second
                 
                 if (timeLimit > 0) {
                     const remainingTime = timeLimit - seconds;
@@ -983,11 +1082,13 @@
             const starsEarned = calculateStarsEarned();
             totalStars += starsEarned;
             currentScore = calculateScore();
+            
+            // Update high score if current score is higher
             if (currentScore > highScore) {
                 highScore = currentScore;
             }
-            saveGameState();
             
+            saveGameState();
             playWinSound();
             
             if (currentLevel < totalLevels) {
@@ -1001,7 +1102,7 @@
             }
             
             updateStarsDisplay();
-            updateStats();
+            updateStats(); // Final update
         }
         
         // Go to next level
@@ -1013,9 +1114,12 @@
             showSplashScreen();
         }
         
-        // Update statistics display
+        // Update statistics display - FIXED VERSION
         function updateStats() {
+            // Always recalculate current score
             currentScore = calculateScore();
+            
+            // Update all displays
             document.getElementById('score').textContent = currentScore;
             document.getElementById('highScore').textContent = highScore;
             document.getElementById('moves').textContent = moves;
@@ -1110,7 +1214,6 @@
         
         // Initialize the game when page loads
         window.onload = function() {
-            // Show loading screen
             const loadingScreen = document.getElementById('loadingScreen');
             const gameContainer = document.getElementById('gameContainer');
             
