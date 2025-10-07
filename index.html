@@ -404,10 +404,29 @@
             margin-bottom: 20px;
             transform: rotate(90deg);
         }
+        
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 4000;
+            color: white;
+            font-size: 20px;
+        }
     </style>
 </head>
 <body>
-    <div class="game-container">
+    <div class="loading" id="loadingScreen">
+        Loading your progress...
+    </div>
+    
+    <div class="game-container" id="gameContainer" style="display: none;">
         <div class="header">
             🎯 Emoji Match Pro
         </div>
@@ -537,6 +556,41 @@
                 warning.classList.add('show');
             } else {
                 warning.classList.remove('show');
+            }
+        }
+        
+        // Save game state to localStorage
+        function saveGameState() {
+            try {
+                const gameState = {
+                    currentLevel: currentLevel,
+                    totalStars: totalStars,
+                    highScore: highScore,
+                    lastPlayed: new Date().toISOString()
+                };
+                localStorage.setItem('emojiMatchGameState', JSON.stringify(gameState));
+                console.log('Game state saved successfully');
+            } catch (e) {
+                console.log('Save failed:', e);
+            }
+        }
+        
+        // Load game state from localStorage
+        function loadGameState() {
+            try {
+                const saved = localStorage.getItem('emojiMatchGameState');
+                if (saved) {
+                    const gameState = JSON.parse(saved);
+                    currentLevel = gameState.currentLevel || 1;
+                    totalStars = gameState.totalStars || 0;
+                    highScore = gameState.highScore || 0;
+                    console.log('Game state loaded successfully');
+                    return true;
+                }
+                return false;
+            } catch (e) {
+                console.log('Load failed:', e);
+                return false;
             }
         }
         
@@ -721,35 +775,6 @@
             score += (stars * 20);
             
             return Math.max(score, 0);
-        }
-        
-        // Save game state (would work in real browser)
-        function saveGameState() {
-            try {
-                const gameState = {
-                    currentLevel: currentLevel,
-                    totalStars: totalStars,
-                    highScore: highScore
-                };
-                // localStorage.setItem('emojiMatchGameState', JSON.stringify(gameState));
-            } catch (e) {
-                console.log('Save failed:', e);
-            }
-        }
-        
-        // Load game state (would work in real browser)
-        function loadGameState() {
-            try {
-                // const saved = localStorage.getItem('emojiMatchGameState');
-                // if (saved) {
-                //     const gameState = JSON.parse(saved);
-                //     currentLevel = gameState.currentLevel || 1;
-                //     totalStars = gameState.totalStars || 0;
-                //     highScore = gameState.highScore || 0;
-                // }
-            } catch (e) {
-                console.log('Load failed:', e);
-            }
         }
         
         // Initialize the game
@@ -1012,9 +1037,13 @@
         
         // Start a new game
         function newGame() {
-            currentLevel = 1;
-            saveGameState();
-            showSplashScreen();
+            if (confirm('Start a new game? Your current progress will be lost.')) {
+                currentLevel = 1;
+                totalStars = 0;
+                highScore = 0;
+                saveGameState();
+                showSplashScreen();
+            }
         }
         
         // Shop functions
@@ -1034,6 +1063,7 @@
                 saveGameState();
                 updateStarsDisplay();
                 alert('✅ +5 Extra Moves purchased!');
+                closeShop();
             } else {
                 alert('❌ Not enough stars! Need 10 stars.');
             }
@@ -1046,6 +1076,7 @@
                 saveGameState();
                 updateStarsDisplay();
                 alert('✅ +15 Extra Seconds purchased!');
+                closeShop();
             } else {
                 alert('❌ Not enough stars! Need 15 stars.');
             }
@@ -1058,6 +1089,7 @@
                 saveGameState();
                 updateStarsDisplay();
                 alert('✅ Move limit removed for this game!');
+                closeShop();
             } else {
                 alert('❌ Not enough stars! Need 25 stars.');
             }
@@ -1070,6 +1102,7 @@
                 saveGameState();
                 updateStarsDisplay();
                 alert('✅ Time limit removed for this game!');
+                closeShop();
             } else {
                 alert('❌ Not enough stars! Need 25 stars.');
             }
@@ -1077,9 +1110,29 @@
         
         // Initialize the game when page loads
         window.onload = function() {
-            // loadGameState(); // Would work in real browser
+            // Show loading screen
+            const loadingScreen = document.getElementById('loadingScreen');
+            const gameContainer = document.getElementById('gameContainer');
+            
+            // Load saved game state
+            const loaded = loadGameState();
+            
+            // Hide loading and show game
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+                gameContainer.style.display = 'block';
+                
+                if (loaded) {
+                    document.getElementById('message').textContent = `Welcome back! Continue from Level ${currentLevel}`;
+                    setTimeout(() => {
+                        showSplashScreen();
+                    }, 1000);
+                } else {
+                    showSplashScreen();
+                }
+            }, 500);
+            
             checkOrientation();
-            showSplashScreen();
             document.body.addEventListener('touchstart', initAudio, { once: true });
             document.body.addEventListener('click', initAudio, { once: true });
         };
@@ -1089,6 +1142,9 @@
         window.addEventListener('orientationchange', function() {
             setTimeout(checkOrientation, 100);
         });
+        
+        // Auto-save every 30 seconds
+        setInterval(saveGameState, 30000);
     </script>
 </body>
 </html>
