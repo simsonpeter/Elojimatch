@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.jayathasoft.emojimatch" 
+        version="1.0.0" 
+        xmlns="http://www.w3.org/ns/widgets" 
+        xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    
+    <name>Emoji Match Pro</name>
+    <description>Fun emoji matching game with 100 levels!</description>
+    <author email="simsonpeterl@gmail.com" href="https://simsonpeter.github.io/Elojimatch/">
+        JayathaSoft
+    </author>
+    
+    <!-- App Icon -->
+    <icon src="icon.png" />
+    
+    <!-- Permissions -->
+    <platform name="android">
+        <preference name="android-minSdkVersion" value="22" />
+        <preference name="android-targetSdkVersion" value="33" />
+        <preference name="Fullscreen" value="true" />
+        <preference name="Orientation" value="portrait" />
+    </platform>
+    
+    <platform name="ios">
+        <preference name="Orientation" value="portrait" />
+    </platform>
+    
+    <!-- Plugins (for AdMob later) -->
+    <!-- <plugin name="cordova-plugin-admob-free" spec="0.27.0" /> -->
+    
+    <!-- Content -->
+    <content src="index.html" />
+    
+    <!-- Access rules -->
+    <access origin="*" />
+    <allow-navigation href="*" />
+    
+</widget>
